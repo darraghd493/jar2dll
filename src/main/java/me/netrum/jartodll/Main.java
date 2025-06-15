@@ -7,12 +7,10 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import me.netrum.jartodll.base.Jar2DLL;
 
-import java.io.IOException;
-
 public class Main extends Application {
     public static void main(String[] args) throws Exception {
         if(args.length != 0){
-            Jar2DLL.doThing(args);
+            new Jar2DLL().run(args, null);
         }else launch(args);
     }
 

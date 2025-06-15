@@ -1,8 +1,6 @@
 package me.netrum.jartodll;
 
 import javafx.application.Platform;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
@@ -33,12 +31,12 @@ public class GUIController {
 
         new Thread(() -> {
             try {
-                Jar2DLL.doThing(new String[]{
+                new Jar2DLL().run(new String[]{
                         "--input", input.getText(), "--output", output.getText(),
                         "--cmakePath", cmakePath.getText(),
                         "--entryPoint", mainClass.getText(),
                         "--saveSource", String.valueOf(saveSource.isSelected())
-                });
+                }, progressBar);
 
                 Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -77,9 +75,5 @@ public class GUIController {
             String entryPoint = Jar2DLL.getEntryPoint(path);
             mainClass.setText(entryPoint == null ? "" : entryPoint);
         }
-    }
-
-    public void initialize(){
-        Jar2DLL.progressBar = progressBar;
     }
 }

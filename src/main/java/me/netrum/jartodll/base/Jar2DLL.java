@@ -1,7 +1,7 @@
 package me.netrum.jartodll.base;
 
+import javafx.fxml.FXML;
 import javafx.scene.control.ProgressBar;
-import me.netrum.jartodll.GUIController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,9 +21,13 @@ import java.util.jar.Manifest;
 
 public class Jar2DLL {
     public static final Logger logger = LogManager.getLogger(Jar2DLL.class);
+
+    @FXML
     public static ProgressBar progressBar;
 
-    public static void doThing(String[] args) throws Exception {
+    public void run(String[] args, ProgressBar progressBar) throws Exception {
+        Jar2DLL.progressBar = progressBar;
+
         String input = parseVariable(args, "input", true),
                 output = parseVariable(args, "output", true),
                 entryPoint = parseVariable(args, "entryPoint", false), cmakePath = parseVariable(args, "cmake", false),
@@ -51,7 +55,7 @@ public class Jar2DLL {
 
         byte[] bootstrapBytes_2 = getBytes(Jar2DLL.class.getResourceAsStream("/me/netrum/jartodll/base/Jar2DLLClassLoader$1$1.class"));
         classes.add(new ResourceEntry("me.netrum.jartodll.base.Jar2DLLClassLoader$1$1", bootstrapBytes_2));
-        progressBar.setProgress(0.1);
+        this.setProgress(0.1);
 
         while(entries.hasMoreElements()){
             JarEntry entry = entries.nextElement();
@@ -67,7 +71,7 @@ public class Jar2DLL {
                 if(!entry.isDirectory()) resources.add(new ResourceEntry(entry.getName(), bytes));
             }
         }
-        progressBar.setProgress(0.4);
+        this.setProgress(0.4);
 
         if(classes.size() < 2){
             logger.fatal("There is no Java classes...");
@@ -220,7 +224,7 @@ public class Jar2DLL {
                     path.resolve(String.format("%s_source.cpp", new File(input).getName().replace(".jar", ""))));
         }
 
-        progressBar.setProgress(0.5);
+        this.setProgress(0.5);
 
         Files.write(path.resolve(Paths.get("source.cpp")), cppOutput.toString().getBytes());
         Files.write(path.resolve(Paths.get("CMakeLists.txt")), getBytes(Jar2DLL.class.getResourceAsStream("/CMakeLists.txt")));
@@ -228,7 +232,7 @@ public class Jar2DLL {
         Files.write(path.resolve(Paths.get("jni_md.h")), getBytes(Jar2DLL.class.getResourceAsStream("/jni_md.h")));
         Files.write(path.resolve(Paths.get("pch.cpp")), getBytes(Jar2DLL.class.getResourceAsStream("/pch.cpp")));
         Files.write(path.resolve(Paths.get("pch.h")), getBytes(Jar2DLL.class.getResourceAsStream("/pch.h")));
-        progressBar.setProgress(0.6);
+        this.setProgress(0.6);
 
         if(!Files.exists(Paths.get(cmakePath))){
             logger.fatal("Specify CMake path with '--cmake' parameter");
@@ -243,7 +247,7 @@ public class Jar2DLL {
                 "CMakeLists.txt"
         }, null, path.toFile().getAbsoluteFile());
         process.waitFor();
-        progressBar.setProgress(0.8);
+        this.setProgress(0.8);
 
         process = Runtime.getRuntime().exec(new String[]{
                 cmake.toFile().getAbsolutePath(),
@@ -254,7 +258,7 @@ public class Jar2DLL {
         int cb;
         while((cb = inputStream.read()) != -1){}
         
-        progressBar.setProgress(0.9);
+        this.setProgress(0.9);
 
         logger.info("Cleaning up...");
         byte[] dllBytes = getBytes(Files.newInputStream(path.resolve(Paths.get("build/lib/jartodll.dll"))));
@@ -262,7 +266,13 @@ public class Jar2DLL {
         Files.write(path.resolve(output), dllBytes);
 
         logger.info("Output path: {}", path.resolve(output).toFile().getAbsolutePath());
-        progressBar.setProgress(1);
+        this.setProgress(1);
+    }
+
+    private void setProgress(double progress) {
+        if (progressBar != null) {
+            progressBar.setProgress(progress);
+        }
     }
 
     private static String parseVariable(String[] args, String variableName, boolean required) throws Exception {
