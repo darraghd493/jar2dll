@@ -20,7 +20,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 public class Jar2DLL {
-    public static final Logger logger = LogManager.getLogger();
+    public static final Logger logger = LogManager.getLogger(Jar2DLL.class);
     public static ProgressBar progressBar;
 
     public static void doThing(String[] args) throws Exception {
